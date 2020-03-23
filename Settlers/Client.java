@@ -21,6 +21,7 @@ import java.net.*;
 import java.io.*; 
 import java.util.concurrent.locks.ReentrantLock;
 import javafx.scene.shape.Polygon;
+import java.net.InetAddress;
 public class Client extends Application 
 {
     public static void main(String[] args) {
@@ -34,7 +35,7 @@ public class Client extends Application
     }
     
     private static String ip_name = "localhost";
-    private static int port = 5056;
+    private static int port = 80;
     Player player;
     private Group root;
     private GraphicsContext gc;
@@ -75,7 +76,7 @@ public class Client extends Application
         new AnimationTimer(){
             public void handle(long currentNanoTime)
             {
-                            player.draw(gc,700,300);
+                            //player.draw(gc,700,300);
 
                 processInfo();
             }
@@ -137,13 +138,16 @@ public class Client extends Application
 
             InetAddress ip = InetAddress.getByName(ip_name); 
       
-            // establish the connection with server port 5056 
+            // establish the connection with server port  
             Socket s = new Socket(ip, port);
             System.out.println("Connected");
 
             // obtaining input and out streams             
-            odos = new ObjectOutputStream(s.getOutputStream()); 
-            odis = new ObjectInputStream(s.getInputStream()); 
+            odos = new ObjectOutputStream(s.getOutputStream());
+            InputStream i = s.getInputStream();
+
+            odis = new ObjectInputStream(i); 
+            
 
             // the following loop performs the exchange of 
             // information between client and client handler 

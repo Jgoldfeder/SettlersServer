@@ -16,13 +16,13 @@ public class Server
     static ArrayList<ObjectOutputStream> outStreams = new ArrayList<>();
     public static void main(String[] args) throws IOException  
     { 
-        int port = 5056;
+        int port = 80;
         if(args.length>0){
             port = Integer.parseInt(args[0]);
         }
         //generate the board
         board =  Util.genBoard();
-        // server is listening on port 5056 
+        // server is listening on port 80
         ServerSocket ss = new ServerSocket(port); 
           
         // running infinite loop for getting 
@@ -39,13 +39,14 @@ public class Server
                 System.out.println("A new client is connected : " + s); 
                   
                 // obtaining input and out streams 
-                DataInputStream dis = new DataInputStream(s.getInputStream()); 
-                DataOutputStream dos = new DataOutputStream(s.getOutputStream()); 
-                  
+                OutputStream dos = s.getOutputStream();  
+                InputStream dis = s.getInputStream(); 
+                 
+                 
                 System.out.println("Assigning new thread for this client"); 
   
                 // create a new thread object 
-                Thread t = new ClientHandler(s, dis, dos); 
+                Thread t = new ClientHandler(s, new ObjectOutputStream(dos),new ObjectInputStream(dis)); 
   
                 // Invoking the start() method 
                 t.start(); 
@@ -68,17 +69,13 @@ class ClientHandler extends Thread
       
   
     // Constructor 
-    public ClientHandler(Socket s, DataInputStream dis, DataOutputStream dos)  
+    public ClientHandler(Socket s, ObjectOutputStream dos, ObjectInputStream dis)  
     { 
         this.s = s; 
-        try{
-            this.odos = new ObjectOutputStream(dos);
-            this.odis = new ObjectInputStream(dis); 
-        }catch(IOException e){
-            e.printStackTrace(); 
 
-        }
-        
+            this.odos = dos;
+            this.odis = dis; 
+
         // add this client to list of streams
         Server.lock.lock();
         try{
@@ -123,7 +120,6 @@ class ClientHandler extends Thread
             Info info = new Info();
             info.color = color;
             odos.writeObject(info);
-
             //send board
             odos.writeObject(Server.board);
                    
